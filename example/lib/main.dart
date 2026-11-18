@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:device_preview/device_preview.dart';
 import 'package:device_preview/presets.dart';
 import 'package:firebase_auth_well/firebase_auth_well.dart';
+import 'package:firebase_auth_well/src/u_i_copy.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';

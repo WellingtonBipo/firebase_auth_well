@@ -11,18 +11,7 @@ class const FAWScaffold({
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context).copyWith(
-        brightness: context.fawStyle.brightness,
-        textTheme: context.textTheme,
-        colorScheme: ColorScheme.fromSeed(
-          brightness: context.fawStyle.brightness!,
-          seedColor: context.fawStyle.primaryColor!,
-        ),
-        outlinedButtonTheme: _outlinedButtonTheme(context),
-        elevatedButtonTheme: _elevatedButtonTheme(context),
-        textButtonTheme: _textButtonTheme(context),
-        inputDecorationTheme: _inputDecorationTheme(context),
-      ),
+      data: _themeData(context),
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         body: body,
@@ -33,6 +22,21 @@ class const FAWScaffold({
                 title: title?.let(Text.new),
               ),
       ),
+    );
+  }
+
+  ThemeData _themeData(BuildContext context) {
+    return Theme.of(context).copyWith(
+      brightness: context.fawStyle.brightness,
+      textTheme: context.textTheme,
+      colorScheme: ColorScheme.fromSeed(
+        brightness: context.fawStyle.brightness!,
+        seedColor: context.fawStyle.primaryColor!,
+      ),
+      outlinedButtonTheme: _outlinedButtonTheme(context),
+      elevatedButtonTheme: _elevatedButtonTheme(context),
+      textButtonTheme: _textButtonTheme(context),
+      inputDecorationTheme: _inputDecorationTheme(context),
     );
   }
 

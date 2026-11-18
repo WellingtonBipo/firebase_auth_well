@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth_well/src/faw_service.dart';
+import 'package:firebase_auth_well/src/u_i_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:utils_well/utils_well.dart';
 
@@ -59,65 +60,6 @@ class FAWWidgetSettings {
   final WhenLogoutCallback? whenLogout;
   final LoadAfterAuthenticateCallback? loadAfterAuthenticate;
   final ConvertUnknownErrorCallback? convertUnknownError;
-}
-
-class const UICopy({
-  final String debugLoginEmail = '',
-  final String debugLoginPassword = '',
-  final String emailInvalid = 'Email inválido.',
-  final String emailExist = 'Este email já está em uso.',
-  final String weakPassword = 'A senha é muito fraca.',
-  final String emailOrPasswordWrong =
-      'Email ou senha incorretos.\nVerifique se digitou corretamente.',
-  final String accountProblem =
-      'Há um problema com sua conta.\nEntre em contato com o suporte.',
-  final String tooManyRequests =
-      'Solicitações bloqueadas devido a atividades incomuns.'
-      '\nTente novamente mais tarde.',
-  final String userDisabled =
-      'Há um problema com sua conta.'
-      '\nEntre em contato com o suporte.',
-  final String unknownError = 'Erro desconhecido.',
-  final String emailLabel = 'Email',
-  final String emailHint = 'your.email@example.com',
-  final String passwordLabel = 'Senha',
-  final String passwordHint = '••••••••',
-  final String passwordConfirmLabel = 'Repetir senha',
-  final String emailEmpty = 'Por favor, insira seu email.',
-  final String passwordEmpty = 'Por favor, insira sua senha.',
-  final String Function(int min) passwordTooShort = _passwordTooShort,
-  final String passwordsDontMatch = 'As senhas não coincidem.',
-  final String forgotPassword = 'Esqueci minha senha',
-  final String signInButton = 'Entrar',
-  final String orContinueWith = 'ou continue com',
-  final String createAccount = 'Criar conta',
-  final String signUpTitle = 'Criar conta',
-  final String signUpButton = 'Criar conta',
-  final String verifyEmailTitle = 'Verificar email',
-  final String Function(String? email) verifyEmailSent = _verifyEmailSent,
-  final String verifyEmailInstructions =
-      'Por favor, verifique sua caixa de entrada e siga as instruções'
-      ' para completar o processo de verificação.',
-  final String resendEmail = 'Reenviar email',
-  final String Function(int seconds) resendEmailIn = _resendEmailIn,
-  final String resendEmailError = 'Erro ao reenviar email de verificação.',
-  final String resetPasswordTitle = 'Redefinir senha',
-  final String resetPasswordInstructions =
-      'Informe seu email para receber o link de redefinição de senha.',
-  final String resetPasswordButton = 'Enviar link',
-  final String resetPasswordSent =
-      'Se houver uma conta com este email,'
-      ' você receberá um link para redefinir sua senha.',
-  final String? Function(FAWServiceUnknownError)? handleUnknownError,
-}) {
-  static String _passwordTooShort(int min) =>
-      'A senha deve ter pelo menos $min caracteres.';
-
-  static String _verifyEmailSent(String? email) => email == null
-      ? 'Um email de verificação foi enviado para seu email.'
-      : 'Um email de verificação foi enviado para $email.';
-
-  static String _resendEmailIn(int seconds) => 'Reenviar email em $seconds s';
 }
 
 class const FAWWidgetStyle({
