@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "My App",
+        "supportEmail": "support@undefined.firebaseapp.com"
+      }
+    }
+  },
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "faw-pkg-example",
+          "configurations": {
+            "web": "1:875051537574:web:81d9a49b3a3256bcb01067"
+          }
+        }
+      }
+    }
+  }
+}

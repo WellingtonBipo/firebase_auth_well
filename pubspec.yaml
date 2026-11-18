@@ -1,0 +1,28 @@
+name: firebase_auth_well
+description: Reusable Firebase authentication package with service and UI screens for Flutter apps.
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_auth: ^6.2.0
+  firebase_core: ^4.0.0
+
+  utils_well:
+    git:
+      url: https://github.com/WellingtonBipo/utils_well.git
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/google_icon.png
+    - assets/apple_icon.png
