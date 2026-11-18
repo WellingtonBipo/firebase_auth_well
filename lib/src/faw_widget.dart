@@ -9,28 +9,19 @@ import 'screens/reset_password_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/verify_email_screen.dart';
 
-class FAWWidget extends StatelessWidget {
-  const FAWWidget({
-    required this.routeLoginSuccess,
-    this.routeAutoLoginSuccess,
-    this.routeSignUpSuccess,
-    required this.settings,
-    this.style,
-    super.key,
-  });
-
-  final FAWWidgetSettings settings;
-  final FAWWidgetStyle? style;
-
-  final FutureOr<String> Function() routeLoginSuccess;
-  final FutureOr<String?> Function()? routeAutoLoginSuccess;
-  final FutureOr<String> Function()? routeSignUpSuccess;
-
+class const FAWWidget({
+  required final FutureOr<String> Function() routeLoginSuccess,
+  final FutureOr<String?> Function()? routeAutoLoginSuccess,
+  final FutureOr<String> Function()? routeSignUpSuccess,
+  required final FAWWidgetSettings settings,
+  final FAWWidgetStyle? style,
+  super.key,
+}) extends StatelessWidget {
+  //
   @override
   Widget build(BuildContext context) {
-    FAWServiceInternal.whenLogout = settings.whenLogout;
-    FAWServiceInternal.loadAfterAuthenticate = settings.loadAfterAuthenticate;
-    FAWServiceInternal.convertUnknownError = settings.convertUnknownError;
+    FAWServiceInternal.settings = settings;
+    FAWServiceInternal.style = style;
     return Navigator(
       onGenerateRoute: (settings) {
         Route b(WidgetBuilder builder) =>
@@ -47,34 +38,10 @@ class FAWWidget extends StatelessWidget {
   }
 }
 
-class FAWResetPasswordScreen extends StatelessWidget {
-  const FAWResetPasswordScreen({
-    this.settings = const FAWWidgetSettings(),
-    this.email,
-    super.key,
-  });
-
-  final FAWWidgetSettings settings;
-  final String? email;
-
-  @override
-  Widget build(BuildContext context) {
-    return _FAWSettingsScope(
-      settings: settings,
-      child: ResetPasswordScreen(initialEmail: email),
-    );
-  }
-}
-
-class _FAWSettingsScope extends StatelessWidget {
-  const _FAWSettingsScope({required this.settings, required this.child});
-
-  final FAWWidgetSettings settings;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
+class const FAWResetPasswordScreen({
+  super.email,
+  super.key,
+}) extends ResetPasswordScreen {}
 
 class FAWWidgetSettings {
   const FAWWidgetSettings({
@@ -94,57 +61,55 @@ class FAWWidgetSettings {
   final ConvertUnknownErrorCallback? convertUnknownError;
 }
 
-class UICopy {
-  const UICopy({
-    this.debugLoginEmail = '',
-    this.debugLoginPassword = '',
-    this.emailInvalid = 'Email inválido.',
-    this.emailExist = 'Este email já está em uso.',
-    this.weakPassword = 'A senha é muito fraca.',
-    this.emailOrPasswordWrong =
-        'Email ou senha incorretos.\nVerifique se digitou corretamente.',
-    this.accountProblem =
-        'Há um problema com sua conta.\nEntre em contato com o suporte.',
-    this.tooManyRequests =
-        'Solicitações bloqueadas devido a atividades incomuns.'
-        '\nTente novamente mais tarde.',
-    this.userDisabled =
-        'Há um problema com sua conta.'
-        '\nEntre em contato com o suporte.',
-    this.unknownError = 'Erro desconhecido.',
-    this.emailLabel = 'Email',
-    this.emailHint = 'your.email@example.com',
-    this.passwordLabel = 'Senha',
-    this.passwordHint = '••••••••',
-    this.passwordConfirmLabel = 'Repetir senha',
-    this.emailEmpty = 'Por favor, insira seu email.',
-    this.passwordEmpty = 'Por favor, insira sua senha.',
-    this.passwordTooShort = _passwordTooShort,
-    this.passwordsDontMatch = 'As senhas não coincidem.',
-    this.forgotPassword = 'Esqueci minha senha',
-    this.signInButton = 'Entrar',
-    this.orContinueWith = 'ou continue com',
-    this.createAccount = 'Criar conta',
-    this.signUpTitle = 'Criar conta',
-    this.signUpButton = 'Criar conta',
-    this.verifyEmailTitle = 'Verificar email',
-    this.verifyEmailSent = _verifyEmailSent,
-    this.verifyEmailInstructions =
-        'Por favor, verifique sua caixa de entrada e siga as instruções'
-        ' para completar o processo de verificação.',
-    this.resendEmail = 'Reenviar email',
-    this.resendEmailIn = _resendEmailIn,
-    this.resendEmailError = 'Erro ao reenviar email de verificação.',
-    this.resetPasswordTitle = 'Redefinir senha',
-    this.resetPasswordInstructions =
-        'Informe seu email para receber o link de redefinição de senha.',
-    this.resetPasswordButton = 'Enviar link',
-    this.resetPasswordSent =
-        'Se houver uma conta com este email,'
-        ' você receberá um link para redefinir sua senha.',
-    this.handleUnknownError,
-  });
-
+class const UICopy({
+  final String debugLoginEmail = '',
+  final String debugLoginPassword = '',
+  final String emailInvalid = 'Email inválido.',
+  final String emailExist = 'Este email já está em uso.',
+  final String weakPassword = 'A senha é muito fraca.',
+  final String emailOrPasswordWrong =
+      'Email ou senha incorretos.\nVerifique se digitou corretamente.',
+  final String accountProblem =
+      'Há um problema com sua conta.\nEntre em contato com o suporte.',
+  final String tooManyRequests =
+      'Solicitações bloqueadas devido a atividades incomuns.'
+      '\nTente novamente mais tarde.',
+  final String userDisabled =
+      'Há um problema com sua conta.'
+      '\nEntre em contato com o suporte.',
+  final String unknownError = 'Erro desconhecido.',
+  final String emailLabel = 'Email',
+  final String emailHint = 'your.email@example.com',
+  final String passwordLabel = 'Senha',
+  final String passwordHint = '••••••••',
+  final String passwordConfirmLabel = 'Repetir senha',
+  final String emailEmpty = 'Por favor, insira seu email.',
+  final String passwordEmpty = 'Por favor, insira sua senha.',
+  final String Function(int min) passwordTooShort = _passwordTooShort,
+  final String passwordsDontMatch = 'As senhas não coincidem.',
+  final String forgotPassword = 'Esqueci minha senha',
+  final String signInButton = 'Entrar',
+  final String orContinueWith = 'ou continue com',
+  final String createAccount = 'Criar conta',
+  final String signUpTitle = 'Criar conta',
+  final String signUpButton = 'Criar conta',
+  final String verifyEmailTitle = 'Verificar email',
+  final String Function(String? email) verifyEmailSent = _verifyEmailSent,
+  final String verifyEmailInstructions =
+      'Por favor, verifique sua caixa de entrada e siga as instruções'
+      ' para completar o processo de verificação.',
+  final String resendEmail = 'Reenviar email',
+  final String Function(int seconds) resendEmailIn = _resendEmailIn,
+  final String resendEmailError = 'Erro ao reenviar email de verificação.',
+  final String resetPasswordTitle = 'Redefinir senha',
+  final String resetPasswordInstructions =
+      'Informe seu email para receber o link de redefinição de senha.',
+  final String resetPasswordButton = 'Enviar link',
+  final String resetPasswordSent =
+      'Se houver uma conta com este email,'
+      ' você receberá um link para redefinir sua senha.',
+  final String? Function(FAWServiceUnknownError)? handleUnknownError,
+}) {
   static String _passwordTooShort(int min) =>
       'A senha deve ter pelo menos $min caracteres.';
 
@@ -153,43 +118,6 @@ class UICopy {
       : 'Um email de verificação foi enviado para $email.';
 
   static String _resendEmailIn(int seconds) => 'Reenviar email em $seconds s';
-
-  final String debugLoginEmail;
-  final String debugLoginPassword;
-  final String emailOrPasswordWrong;
-  final String accountProblem;
-  final String tooManyRequests;
-  final String userDisabled;
-  final String unknownError;
-  final String? Function(FAWServiceUnknownError)? handleUnknownError;
-  final String emailLabel;
-  final String emailHint;
-  final String passwordLabel;
-  final String passwordHint;
-  final String passwordConfirmLabel;
-  final String emailInvalid;
-  final String emailExist;
-  final String weakPassword;
-  final String emailEmpty;
-  final String passwordEmpty;
-  final String Function(int min) passwordTooShort;
-  final String passwordsDontMatch;
-  final String forgotPassword;
-  final String signInButton;
-  final String orContinueWith;
-  final String createAccount;
-  final String signUpTitle;
-  final String signUpButton;
-  final String verifyEmailTitle;
-  final String Function(String? email) verifyEmailSent;
-  final String verifyEmailInstructions;
-  final String resendEmail;
-  final String Function(int seconds) resendEmailIn;
-  final String resendEmailError;
-  final String resetPasswordTitle;
-  final String resetPasswordInstructions;
-  final String resetPasswordButton;
-  final String resetPasswordSent;
 }
 
 class const FAWWidgetStyle({
@@ -235,14 +163,11 @@ extension FAWWidgetInternal on BuildContext {
 
   bool get isLight => fawStyle.brightness == Brightness.light;
 
-  FAWWidget get fawWidget => findAncestorWidgetOfExactType<FAWWidget>()!;
-  FAWWidgetSettings get fawSettings =>
-      findAncestorWidgetOfExactType<_FAWSettingsScope>()?.settings ??
-      fawWidget.settings;
+  FAWWidgetSettings get fawSettings => FAWServiceInternal.settings;
   UICopy get uiCopy => fawSettings.uiCopy;
 
   FAWWidgetStyle get fawStyle {
-    final style = fawWidget.style;
+    final style = FAWServiceInternal.style;
     return FAWWidgetStyle(
       brightness: style?.brightness ?? theme.brightness,
       primaryColor:
@@ -312,9 +237,10 @@ extension FAWWidgetInternal on BuildContext {
   }
 
   Future<void> navigateAuthSuccess(AuthUser user) async {
-    final faw = fawWidget;
+    final faw = findAncestorWidgetOfExactType<FAWWidget>()!;
     final nav = Navigator.of(this);
-    if (faw.settings.mustHaveEmailVerified && !user.emailVerified) {
+    if (FAWServiceInternal.settings.mustHaveEmailVerified &&
+        !user.emailVerified) {
       await nav.pushNamed('/verify-email', arguments: user);
       return;
     }
@@ -326,7 +252,7 @@ extension FAWWidgetInternal on BuildContext {
   }
 
   Future<void> navigateAutoLoginSuccess() async {
-    final faw = fawWidget;
+    final faw = findAncestorWidgetOfExactType<FAWWidget>()!;
     final replace = _rootReplacer();
     var route = await faw.routeLoginSuccess();
     if (faw.routeAutoLoginSuccess != null) {

@@ -17,9 +17,7 @@ class const FAWScaffold({
         colorScheme: ColorScheme.fromSeed(
           brightness: context.fawStyle.brightness!,
           seedColor: context.fawStyle.primaryColor!,
-          onPrimary: Colors.red,
         ),
-
         outlinedButtonTheme: _outlinedButtonTheme(context),
         elevatedButtonTheme: _elevatedButtonTheme(context),
         textButtonTheme: _textButtonTheme(context),

@@ -83,7 +83,6 @@ class _ExampleAppState extends State<ExampleApp>
         '/home': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
         '/reset-password': (context) => FAWResetPasswordScreen(
-          settings: fawSettings,
           email: FAWService.user.email,
         ),
       },

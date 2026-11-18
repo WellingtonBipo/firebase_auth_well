@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:utils_well/utils_well.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({this.initialEmail, super.key});
+  const ResetPasswordScreen({this.email, super.key});
 
-  final String? initialEmail;
+  final String? email;
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -15,7 +15,7 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   late final _emailController = TextEditingController(
-    text: widget.initialEmail,
+    text: widget.email,
   );
   final _send = Command(FAWServiceInternal.sendPasswordResetEmail);
 

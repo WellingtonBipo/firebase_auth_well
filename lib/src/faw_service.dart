@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_auth_well/firebase_auth_well.dart'
+    show FAWWidgetSettings;
+import 'package:firebase_auth_well/src/faw_widget.dart' show FAWWidgetStyle;
 import 'package:flutter/foundation.dart';
 import 'package:utils_well/utils_well.dart';
 
@@ -30,7 +33,7 @@ sealed class FAWService {
 
   static Future<void> logout() async {
     await _auth.signOut();
-    await _whenLogout?.call();
+    await _settings.whenLogout?.call();
   }
 
   static Future<void> deleteAccount() async {
@@ -40,9 +43,8 @@ sealed class FAWService {
   }
 }
 
-WhenLogoutCallback? _whenLogout;
-LoadAfterAuthenticateCallback? _loadAfterAuthenticate;
-ConvertUnknownErrorCallback? _convertUnknownError;
+late FAWWidgetSettings _settings;
+FAWWidgetStyle? _style;
 
 auth.FirebaseAuth get _auth => auth.FirebaseAuth.instance;
 
@@ -65,13 +67,11 @@ AuthUser _getUserLogged(auth.User? u, auth.UserCredential? cred) {
 }
 
 extension FAWServiceInternal on FAWService {
-  static set whenLogout(WhenLogoutCallback? callback) => _whenLogout = callback;
+  static set settings(FAWWidgetSettings v) => _settings = v;
+  static FAWWidgetSettings get settings => _settings;
 
-  static set loadAfterAuthenticate(LoadAfterAuthenticateCallback? callback) =>
-      _loadAfterAuthenticate = callback;
-
-  static set convertUnknownError(ConvertUnknownErrorCallback? callback) =>
-      _convertUnknownError = callback;
+  static set style(FAWWidgetStyle? v) => _style = v;
+  static FAWWidgetStyle? get style => _style;
 
   static Future<Result<void, FAWServiceUnknownError>>
   sendVerificationEmail() async {
@@ -220,8 +220,8 @@ extension FAWServiceInternal on FAWService {
       if (result.isFailure) return await _maybeConvertError<R, E>(result);
       var info = result.successOrThrowFailure();
 
-      if (_loadAfterAuthenticate != null) {
-        final r = await _loadAfterAuthenticate!(loginType, info);
+      if (settings.loadAfterAuthenticate != null) {
+        final r = await settings.loadAfterAuthenticate!(loginType, info);
         if (r.isFailure) {
           return await _maybeConvertError<R, E>(Failure(r.value));
         }
@@ -241,10 +241,10 @@ extension FAWServiceInternal on FAWService {
     E extends FAWServiceLoginError
   >(Result<R, E> result) async {
     await FAWService.logout();
-    if (_convertUnknownError == null) return result;
+    if (settings.convertUnknownError == null) return result;
     final error = result.getFailure();
     if (error is! FAWServiceUnknownError) return result;
-    return Failure(_convertUnknownError!(error) as E);
+    return Failure(settings.convertUnknownError!(error) as E);
   }
 }
 

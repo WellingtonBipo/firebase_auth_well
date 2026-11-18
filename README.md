@@ -8,7 +8,7 @@ Reusable Firebase authentication for Flutter apps: a service plus ready-made scr
 - Email verification
 - Password reset
   
-Requires Dart SDK `^3.13.0`, `firebase_core` and `firebase_auth`.
+Requires Dart SDK `^3.13.0`, `firebase_core`, `firebase_auth` and [`utils_well`](https://github.com/WellingtonBipo/utils_well) (provides the `Result`/`Success`/`Failure` types used by `loadAfterAuthenticate`).
 
 ## Installation
 
@@ -16,8 +16,9 @@ Requires Dart SDK `^3.13.0`, `firebase_core` and `firebase_auth`.
 dependencies:
   firebase_auth_well:
     git:
-      url: <repository url>
-      path: firebase_auth_well
+      url: https://github.com/WellingtonBipo/firebase_auth_well.git
+      ref: main
+    version: 1.0.0
 ```
 
 ## Firebase setup
@@ -96,6 +97,8 @@ class MyApp extends StatelessWidget {
 
 All callbacks can be async (`FutureOr`).
 
+`settings` is also required; pass `const FAWWidgetSettings()` to use the defaults.
+
 ### FAWWidgetSettings
 
 | Field | Default | Description |
@@ -127,10 +130,13 @@ UICopy(
 
 | Field | Description |
 | --- | --- |
+| `brightness` | Light or dark screens. Defaults to `Theme.brightness` |
 | `logo` | `FAWLogo(brandMark, logotype, slogan, brandMarkConstraints)` shown on the login screen |
 | `appBar` | `FAWAppBarStyle(height)` |
 | `dialogsStyle` | `FAWDialogsStyle(buttonsStyle)` |
-| `primaryColor` | Defaults to `Theme.primaryColor` |
+| `buttonStyle` | `FAWButtonStyle(borderRadius, padding)` applied to the screens' buttons |
+| `primaryColor` | `MaterialColor` used as the theme seed. Defaults to `Theme.primaryColor` |
+| `secondaryColor` | Background of the fallback snackbar when there is no `ScaffoldMessenger` |
 | `backgroundLightColor` / `backgroundDarkColor` | Default to `Theme.scaffoldBackgroundColor` |
 | `textThemeLight` / `textThemeDark` | Default to `Theme.textTheme` |
 

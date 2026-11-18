@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen>
       onSuccess: (s) {
         final userInfo = s.data;
         if (userInfo == null) return;
-        if (context.fawWidget.settings.mustHaveEmailVerified &&
+        if (context.fawSettings.mustHaveEmailVerified &&
             !userInfo.emailVerified) {
           return;
         }
@@ -398,7 +398,6 @@ class _SocialButton extends StatelessWidget {
     final height = style.textWidgetSize(context).height;
     return Expanded(
       child: OutlinedButton.icon(
-        // style: context.outlinedButtonStyle,
         label: Text(google ? 'Google' : 'Apple'),
         icon: Image.asset(
           package: 'firebase_auth_well',
