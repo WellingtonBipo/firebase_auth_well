@@ -10,6 +10,8 @@ import 'screens/reset_password_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/verify_email_screen.dart';
 
+export 'package:firebase_auth_well/src/u_i_copy.dart';
+
 class const FAWWidget({
   required final FutureOr<String> Function() routeLoginSuccess,
   final FutureOr<String?> Function()? routeAutoLoginSuccess,

@@ -1,6 +1,6 @@
 name: firebase_auth_well
 description: Reusable Firebase authentication package with service and UI screens for Flutter apps.
-version: 1.0.0
+version: 1.1.0
 publish_to: "none"
 
 environment:
