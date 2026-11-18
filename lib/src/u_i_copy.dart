@@ -58,7 +58,7 @@ class const UICopy({
   static String _resendEmailIn(int seconds) => 'Resend email in $seconds s';
 }
 
-class UICopyPortuguese({
+class const UICopyPortuguese({
   super.debugLoginEmail = '',
   super.debugLoginPassword = '',
   super.emailInvalid = 'Email inválido.',
@@ -119,7 +119,7 @@ class UICopyPortuguese({
 }
 
 // cSpell: disable
-class UICopySpanish({
+class const UICopySpanish({
   super.debugLoginEmail = '',
   super.debugLoginPassword = '',
   super.emailInvalid = 'Correo electrónico inválido.',

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/u_i_copy.dart';
+import 'package:firebase_auth_well/src/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:utils_well/utils_well.dart';
 
@@ -11,6 +12,8 @@ import 'screens/sign_up_screen.dart';
 import 'screens/verify_email_screen.dart';
 
 export 'package:firebase_auth_well/src/u_i_copy.dart';
+export 'package:firebase_auth_well/src/widgets/scaffold.dart'
+    show ButtonProperties, ButtonType;
 
 class const FAWWidget({
   required final FutureOr<String> Function() routeLoginSuccess,
@@ -71,10 +74,8 @@ class const FAWWidgetStyle({
   final FAWDialogsStyle? dialogsStyle,
   final MaterialColor? primaryColor,
   final MaterialColor? secondaryColor,
-  final Color? backgroundLightColor,
-  final Color? backgroundDarkColor,
-  final TextTheme? textThemeLight,
-  final TextTheme? textThemeDark,
+  final Color? backgroundColor,
+  final TextTheme? textTheme,
   final FAWButtonStyle? buttonStyle,
 });
 
@@ -98,8 +99,12 @@ class FAWDialogsStyle {
 }
 
 class FAWButtonStyle({
-  final BorderRadius? borderRadius,
-  final EdgeInsets? padding,
+  final ButtonProperties<BorderRadius>? borderRadius,
+  final ButtonProperties<EdgeInsets>? padding,
+  final ButtonProperties<TextStyle>? textStyle,
+  final ButtonProperties<ShapeBorder>? shapeBorder,
+  final ButtonProperties<Color>? foregroundColor,
+  final ButtonProperties<Color>? backgroundColor,
 }) {}
 
 extension FAWWidgetInternal on BuildContext {
@@ -119,12 +124,8 @@ extension FAWWidgetInternal on BuildContext {
           theme.primaryColor.letType<MaterialColor>() ??
           MaterialColor(theme.primaryColor.toARGB32(), const {}),
       secondaryColor: style?.secondaryColor,
-      backgroundLightColor:
-          style?.backgroundLightColor ?? theme.scaffoldBackgroundColor,
-      backgroundDarkColor:
-          style?.backgroundDarkColor ?? theme.scaffoldBackgroundColor,
-      textThemeLight: style?.textThemeLight ?? theme.textTheme,
-      textThemeDark: style?.textThemeDark ?? theme.textTheme,
+      backgroundColor: style?.backgroundColor ?? theme.scaffoldBackgroundColor,
+      textTheme: style?.textTheme ?? theme.textTheme,
       logo: style?.logo ?? FAWLogo(),
       appBar: style?.appBar,
       dialogsStyle: style?.dialogsStyle,
@@ -132,14 +133,10 @@ extension FAWWidgetInternal on BuildContext {
     );
   }
 
-  TextTheme get textTheme =>
-      (isLight ? fawStyle.textThemeLight : fawStyle.textThemeDark)!;
+  TextTheme get textTheme => fawStyle.textTheme!;
 
   Color get backgroundColor =>
-      (isLight
-          ? fawStyle.backgroundLightColor
-          : fawStyle.backgroundDarkColor) ??
-      theme.scaffoldBackgroundColor;
+      fawStyle.backgroundColor ?? theme.scaffoldBackgroundColor;
 
   String? validateEmail(String email) =>
       email.isEmpty ? uiCopy.emailEmpty : null;
@@ -169,7 +166,7 @@ extension FAWWidgetInternal on BuildContext {
         message: message,
         backgroundColor: fawStyle.secondaryColor,
         textStyle: TextStyle(color: textTheme.bodyMedium?.color),
-        borderRadius: fawStyle.buttonStyle?.borderRadius,
+        borderRadius: fawStyle.buttonStyle?.borderRadius?.resolve(.elevated),
       );
     }
   }
