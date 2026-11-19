@@ -71,7 +71,6 @@ class const FAWWidgetStyle({
   final Brightness? brightness,
   final FAWAppBarStyle? appBar,
   final FAWLogo? logo,
-  final FAWDialogsStyle? dialogsStyle,
   final MaterialColor? primaryColor,
   final MaterialColor? secondaryColor,
   final Color? backgroundColor,
@@ -91,12 +90,6 @@ class const FAWLogo({
   final Widget? brandMark,
   final BoxConstraints? brandMarkConstraints,
 }) {}
-
-class FAWDialogsStyle {
-  const FAWDialogsStyle({this.buttonsStyle});
-
-  final TextStyle? buttonsStyle;
-}
 
 class FAWButtonStyle({
   final ButtonProperties<BorderRadius>? borderRadius,
@@ -128,7 +121,6 @@ extension FAWWidgetInternal on BuildContext {
       textTheme: style?.textTheme ?? theme.textTheme,
       logo: style?.logo ?? FAWLogo(),
       appBar: style?.appBar,
-      dialogsStyle: style?.dialogsStyle,
       buttonStyle: style?.buttonStyle,
     );
   }

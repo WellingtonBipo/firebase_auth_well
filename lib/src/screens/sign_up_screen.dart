@@ -1,6 +1,7 @@
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/faw_widget.dart';
 import 'package:firebase_auth_well/src/widgets/scaffold.dart';
+import 'package:firebase_auth_well/src/widgets/text_field_suffix.dart';
 import 'package:flutter/material.dart';
 import 'package:utils_well/utils_well.dart';
 
@@ -105,6 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       decoration: InputDecoration(
                         labelText: copy.emailLabel,
                         hintText: copy.emailHint,
+                        suffixIcon: TextFieldSuffix(),
                       ),
                       onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     ),
@@ -184,9 +186,9 @@ class _PasswordFieldState extends State<_PasswordField> {
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hint,
-        suffixIcon: IconButton(
-          icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
-          onPressed: () => setState(() => _obscureText = !_obscureText),
+        suffixIcon: TextFieldSuffix(
+          obscureText: () => _obscureText,
+          onTapObscure: () => _obscureText = !_obscureText,
         ),
       ),
     );

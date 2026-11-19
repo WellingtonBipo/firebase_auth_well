@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/faw_widget.dart';
 import 'package:firebase_auth_well/src/widgets/scaffold.dart';
+import 'package:firebase_auth_well/src/widgets/text_field_suffix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,12 +42,27 @@ class _LoginScreenState extends State<LoginScreen>
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
 
-  late final listenables = [_autoLogin, _loginEmail, _loginProvider];
+  late final _listenables = [_autoLogin, _loginEmail, _loginProvider];
+
+  var _obscureText = true;
 
   @override
   void initState() {
     super.initState();
     _tryAutoLogin();
+  }
+
+  @override
+  void dispose() {
+    _logoAnimation.dispose();
+    _autoLogin.dispose();
+    _loginEmail.dispose();
+    _loginProvider.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _tryAutoLogin() async {
@@ -66,27 +82,12 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   @override
-  void dispose() {
-    _logoAnimation.dispose();
-    _autoLogin.dispose();
-    _loginEmail.dispose();
-    _loginProvider.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge(listenables),
+      listenable: Listenable.merge(_listenables),
       builder: (context, _) {
         final r = _autoLogin.result;
-        if (!r.isSuccess && !r.isFailure) {
-          return ColoredBox(color: context.backgroundColor);
-        }
+        if (r._isLoading) return ColoredBox(color: context.backgroundColor);
         return IgnorePointer(
           ignoring: _loginEmail.isLoading || _loginProvider.isLoading,
           child: FAWScaffold(
@@ -198,7 +199,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _body() {
-    var obscureText = true;
     final fields = Column(
       children: [
         TextField(
@@ -208,6 +208,7 @@ class _LoginScreenState extends State<LoginScreen>
           decoration: InputDecoration(
             labelText: context.uiCopy.emailLabel,
             hintText: context.uiCopy.emailHint,
+            suffixIcon: TextFieldSuffix(),
           ),
           autofillHints: [AutofillHints.username],
           onSubmitted: (_) => _passwordFocusNode.requestFocus(),
@@ -218,17 +219,16 @@ class _LoginScreenState extends State<LoginScreen>
             return TextField(
               focusNode: _passwordFocusNode,
               controller: _passwordController,
-              obscureText: obscureText,
+              obscureText: _obscureText,
               autofillHints: [AutofillHints.password],
               onSubmitted: (_) => _onConfirm(),
               decoration: InputDecoration(
                 labelText: context.uiCopy.passwordLabel,
                 hintText: context.uiCopy.passwordHint,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () => setState(() => obscureText = !obscureText),
+                suffixIcon: TextFieldSuffix(
+                  obscureText: () => _obscureText,
+                  onTapObscure: () =>
+                      setState(() => _obscureText = !_obscureText),
                 ),
               ),
             );
@@ -256,11 +256,11 @@ class _LoginScreenState extends State<LoginScreen>
               ),
               SizedBox(height: 10),
               ListenableBuilder(
-                listenable: Listenable.merge(listenables),
+                listenable: Listenable.merge(_listenables),
                 builder: (context, _) {
                   return ElevatedButton(
                     onPressed: _onConfirm,
-                    child: listenables.any((l) => l.isLoading).not
+                    child: _listenables.any((l) => l.isLoading).not
                         ? Text(context.uiCopy.signInButton)
                         : (Theme.of(context)
                                       .elevatedButtonTheme
@@ -583,4 +583,8 @@ enum Alignment {
   bottomLeft,
   bottomCenter,
   bottomRight,
+}
+
+extension on CommandResult<AuthUser?, FAWServiceErrorAutoLogin> {
+  bool get _isLoading => isLoading || isInitial;
 }

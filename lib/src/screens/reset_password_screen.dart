@@ -1,6 +1,7 @@
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/faw_widget.dart';
 import 'package:firebase_auth_well/src/widgets/scaffold.dart';
+import 'package:firebase_auth_well/src/widgets/text_field_suffix.dart';
 import 'package:flutter/material.dart';
 import 'package:utils_well/utils_well.dart';
 
@@ -73,6 +74,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     decoration: InputDecoration(
                       labelText: copy.emailLabel,
                       hintText: copy.emailHint,
+                      suffixIcon: TextFieldSuffix(),
                     ),
                     onSubmitted: (_) => _onConfirm(),
                   ),
