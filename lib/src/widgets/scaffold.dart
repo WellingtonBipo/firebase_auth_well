@@ -7,6 +7,7 @@ import 'package:utils_well/utils_well.dart';
 class const FAWScaffold({
   final String? title,
   final Widget? body,
+  final bool resizeToAvoidBottomInset = true,
   super.key,
 }) extends StatelessWidget {
   //
@@ -16,6 +17,7 @@ class const FAWScaffold({
       data: _themeData(context),
       child: Scaffold(
         backgroundColor: context.backgroundColor,
+        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
         body: body,
         appBar: title == null && Navigator.canPop(context).not
             ? null

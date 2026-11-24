@@ -12,7 +12,6 @@ class const TextFieldSuffix({
 }
 
 class _TextFieldSuffixState extends State<TextFieldSuffix> {
-  EditableTextState? _editableTextState;
   TextEditingController? _controller;
 
   @override
@@ -36,13 +35,13 @@ class _TextFieldSuffixState extends State<TextFieldSuffix> {
   void _setState() => setState(() {});
 
   void _subscribe() {
-    _editableTextState = context
+    final editableTextState = context
         .findAncestorStateOfType<State<TextField>>()
         ?.letType<TextSelectionGestureDetectorBuilderDelegate>()
         ?.editableTextKey
         .currentState;
     _controller?.removeListener(_setState);
-    _controller = _editableTextState?.widget.controller;
+    _controller = editableTextState?.widget.controller;
     _controller?.addListener(_setState);
   }
 

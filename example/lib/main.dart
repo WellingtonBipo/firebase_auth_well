@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 void main() async {
   DevicePreview.enable(padding: const EdgeInsets.all(16));
   DevicePreview.controller.applyPreset(DevicePresets.iPhoneSe3);
+  // DevicePreview.controller.applyPreset(DevicePresets.iPhone17);
+  // DevicePreview.controller.applyPreset(DevicePresets.iPad10);
   DevicePreview.controller.update(
     (d) => d.copyWith(
       keyboardInset: 0,
@@ -27,20 +29,21 @@ void main() async {
 FAWWidgetStyle customStyle(BuildContext context) => FAWWidgetStyle(
   primaryColor: Colors.red,
   logo: FAWLogo(
-    brandMarkConstraints: const BoxConstraints(minHeight: 50, maxHeight: 100),
     slogan: Container(
       color: Colors.blue,
       padding: const EdgeInsets.all(8.0),
       child: const Text('slogan'),
     ),
     logotype: const Text('logotype'),
+    // brandMarkConstraints: const BoxConstraints(minHeight: 50, maxHeight: 100),
     brandMark: Container(
       color: Colors.red,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // print(['brandMark: Container', constraints]);
           return Icon(
             Icons.ac_unit,
-            size: clampDouble(constraints.maxHeight, 50, 100),
+            size: clampDouble(constraints.maxHeight, 50, 150),
           );
         },
       ),

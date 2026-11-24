@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/faw_widget.dart';
@@ -88,33 +89,126 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (context, _) {
         final r = _autoLogin.result;
         if (r._isLoading) return ColoredBox(color: context.backgroundColor);
+        // final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
         return IgnorePointer(
           ignoring: _loginEmail.isLoading || _loginProvider.isLoading,
           child: FAWScaffold(
+            resizeToAvoidBottomInset: false,
             body: Column(
               children: [
                 Builder(
-                  builder: (context) =>
-                      SizedBox(height: MediaQuery.paddingOf(context).top),
+                  builder: (context) => SizedBox(
+                    height: MediaQuery.paddingOf(context).top,
+                  ),
                 ),
+                // Expanded(
+                //   flex: 4,
+                //   child: LayoutBuilder(
+                //     builder: (context, constraints) {
+                //       // print(constraints.maxHeight);
+                //       // return SizedBox.shrink();
+                //       // return _body(constraints.maxHeight * .33);
+                //       return Column(
+                //         children: [
+                //           ?context.fawStyle.logo?.brandMark,
+                //           ?context.fawStyle.logo?.logotype,
+                //           ?context.fawStyle.logo?.slogan,
+                //         ],
+                //       );
+                //     },
+                //   ),
+                // ),
+                // _signin(),
+                // // Spacer(),
+                // // _signup(),
+                // // Spacer(),
+                // Builder(
+                //   builder: (context) => _Flexible(
+                //     bottom: MediaQuery.viewInsetsOf(context).bottom,
+                //     child: _signup(),
+                //   ),
+                // ),
+                // builder: (context) => ConstrainedBox(
+                //   constraints: BoxConstraints(
+                //     minHeight: MediaQuery.viewInsetsOf(context).bottom,
+                //   ),
+                //   child: CustomLay,
+                //   // child: LayoutBuilder(
+                //   //   builder: (context, constraints) {
+                //   //     print(constraints.maxHeight);
+                //   //     return Align(child: _signup());
+                //   //   },
+                //   // ),
+                // ),
+                // ),
+                // Spacer(),
                 Expanded(
                   child: _CustomLayout(
-                    handleChildren: _handleLayout,
                     controller: _logoAnimation,
+                    handleChildren: (children) {
+                      final logo = children['logo'];
+                      final signin = children['signin']!;
+                      final signup = children['signup']!;
+
+                      signin.layout();
+                      signup.layout();
+
+                      final maxHeight = signin.constraints.maxHeight;
+
+                      final space =
+                          maxHeight -
+                          signin.size.height -
+                          (signup.size.height +
+                              MediaQuery.viewPaddingOf(context).bottom);
+
+                      final logoPadding = maxHeight * .01;
+                      // TODO(Wellington): make dinamic
+                      final flex = logo == null ? 4 : (space > 700 ? 6 : 8);
+                      final between = space / (flex + (logo == null ? 0 : 2));
+
+                      signup._align(
+                        maxHeight -
+                            signup.size.height -
+                            between -
+                            MediaQuery.viewPaddingOf(context).bottom,
+                      );
+
+                      final signinY2 = signup.position.dy - between;
+                      var signinY1 = signinY2 - signin.size.height;
+
+                      MediaQuery.viewInsetsOf(context).bottom.let((bottom) {
+                        final signinY2bottomSpace = maxHeight - signinY2;
+                        if (bottom < signinY2bottomSpace) return;
+                        signinY1 -= bottom - signinY2bottomSpace;
+                      });
+
+                      signin._align(signinY1);
+
+                      final logoHeight = signin.position.dy - (2 * logoPadding);
+                      logo?.layout(
+                        constraints: (c) => c.enforce(
+                          BoxConstraints(maxHeight: logoHeight),
+                        ),
+                      );
+                      logo?._align(
+                        logoPadding + logoHeight / 2 - logo.size.height / 2,
+                      );
+
+                      // print(['constraints', signin.constraints]);
+
+                      return;
+                    },
                     children: [
-                      _body(),
-                      ...?context.fawStyle.logo?.let(
-                        (l) => [
-                          ?l.brandMark?.let(
-                            (e) => LayoutId(id: 'brandMark', child: e),
-                          ),
-                          ?l.logotype?.let(
-                            (e) => LayoutId(id: 'logotype', child: e),
-                          ),
-                          ?l.slogan?.let(
-                            (e) => LayoutId(id: 'slogan', child: e),
-                          ),
-                        ],
+                      ?_logoWidget()?.let(
+                        (e) => LayoutId(id: 'logo', child: e),
+                      ),
+                      LayoutId(
+                        id: 'signin',
+                        child: _signin(),
+                      ),
+                      LayoutId(
+                        id: 'signup',
+                        child: _signup(),
                       ),
                     ],
                   ),
@@ -122,6 +216,28 @@ class _LoginScreenState extends State<LoginScreen>
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  Widget? _logoWidget() {
+    final FAWLogo(:brandMark, :logotype, :slogan) =
+        context.fawStyle.logo ?? FAWLogo();
+
+    if (brandMark == null && logotype == null && slogan == null) return null;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        print('constraints: $constraints');
+        final children = [
+          ?brandMark,
+          ?logotype,
+          ?slogan,
+        ];
+        return Column(
+          mainAxisSize: .min,
+          children: children,
         );
       },
     );
@@ -198,115 +314,118 @@ class _LoginScreenState extends State<LoginScreen>
     return null;
   }
 
-  Widget _body() {
-    final fields = Column(
-      children: [
-        TextField(
-          focusNode: _emailFocusNode,
-          controller: _emailController,
-          keyboardType: TextInputType.emailAddress,
-          decoration: InputDecoration(
-            labelText: context.uiCopy.emailLabel,
-            hintText: context.uiCopy.emailHint,
-            suffixIcon: TextFieldSuffix(),
+  Widget _signin() {
+    return Container(
+      padding: .symmetric(horizontal: 30),
+      constraints: BoxConstraints(maxWidth: 450),
+      child: Column(
+        crossAxisAlignment: .stretch,
+        mainAxisSize: .min,
+        children: [
+          AutofillGroup(
+            child: Column(
+              children: [
+                TextField(
+                  focusNode: _emailFocusNode,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: context.uiCopy.emailLabel,
+                    hintText: context.uiCopy.emailHint,
+                    suffixIcon: TextFieldSuffix(),
+                  ),
+                  autofillHints: [AutofillHints.username],
+                  onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                ),
+                SizedBox(height: 15),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return TextField(
+                      focusNode: _passwordFocusNode,
+                      controller: _passwordController,
+                      obscureText: _obscureText,
+                      autofillHints: [AutofillHints.password],
+                      onSubmitted: (_) => _onConfirm(),
+                      decoration: InputDecoration(
+                        labelText: context.uiCopy.passwordLabel,
+                        hintText: context.uiCopy.passwordHint,
+                        suffixIcon: TextFieldSuffix(
+                          obscureText: () => _obscureText,
+                          onTapObscure: () =>
+                              setState(() => _obscureText = !_obscureText),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-          autofillHints: [AutofillHints.username],
-          onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-        ),
-        SizedBox(height: 15),
-        StatefulBuilder(
-          builder: (context, setState) {
-            return TextField(
-              focusNode: _passwordFocusNode,
-              controller: _passwordController,
-              obscureText: _obscureText,
-              autofillHints: [AutofillHints.password],
-              onSubmitted: (_) => _onConfirm(),
-              decoration: InputDecoration(
-                labelText: context.uiCopy.passwordLabel,
-                hintText: context.uiCopy.passwordHint,
-                suffixIcon: TextFieldSuffix(
-                  obscureText: () => _obscureText,
-                  onTapObscure: () =>
-                      setState(() => _obscureText = !_obscureText),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-
-    return Align(
-      alignment: .center,
-      child: Container(
-        padding: .symmetric(horizontal: 30),
-        constraints: BoxConstraints(maxWidth: 450),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: .stretch,
-            mainAxisSize: .min,
-            children: [
-              AutofillGroup(child: fields),
-              SizedBox(height: 10),
-              TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pushNamed('/reset-password'),
-                child: Text(context.uiCopy.forgotPassword),
-              ),
-              SizedBox(height: 10),
-              ListenableBuilder(
-                listenable: Listenable.merge(_listenables),
-                builder: (context, _) {
-                  return ElevatedButton(
-                    onPressed: _onConfirm,
-                    child: _listenables.any((l) => l.isLoading).not
-                        ? Text(context.uiCopy.signInButton)
-                        : (Theme.of(context)
-                                      .elevatedButtonTheme
-                                      .style
-                                      ?.textStyle
-                                      ?.resolve({}) ??
-                                  Theme.of(context).textTheme.bodyMedium!)
-                              .textWidgetSize(context)
-                              .let(
-                                (s) => SizedBox.square(
-                                  dimension: s.height - 4,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: s.height * 0.15,
-                                  ),
-                                ),
+          SizedBox(height: 10),
+          TextButton(
+            onPressed: () => Navigator.of(context).pushNamed('/reset-password'),
+            child: Text(context.uiCopy.forgotPassword),
+          ),
+          SizedBox(height: 10),
+          ListenableBuilder(
+            listenable: Listenable.merge(_listenables),
+            builder: (context, _) {
+              return ElevatedButton(
+                onPressed: _onConfirm,
+                child: _listenables.any((l) => l.isLoading).not
+                    ? Text(context.uiCopy.signInButton)
+                    : (Theme.of(context).elevatedButtonTheme.style?.textStyle
+                                  ?.resolve({}) ??
+                              Theme.of(context).textTheme.bodyMedium!)
+                          .textWidgetSize(context)
+                          .let(
+                            (s) => SizedBox.square(
+                              dimension: s.height - 1,
+                              child: CircularProgressIndicator(
+                                strokeWidth: s.height * 0.15,
                               ),
-                  );
-                },
-              ),
-              SizedBox(height: 35),
-              Align(
-                child: Text(
-                  context.uiCopy.orContinueWith,
-                  style: context.textTheme.labelMedium,
+                            ),
+                          ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _signup() {
+    return Container(
+      padding: .symmetric(horizontal: 30),
+      constraints: BoxConstraints(maxWidth: 450),
+      child: Column(
+        crossAxisAlignment: .stretch,
+        mainAxisSize: .min,
+        children: [
+          Align(
+            child: Text(
+              context.uiCopy.orContinueWith,
+              style: context.textTheme.labelMedium,
+            ),
+          ),
+          SizedBox(height: 15),
+          Row(
+            spacing: 10,
+            children: [
+              _SocialButton(google: true, onTap: () => _onConfirm(.google)),
+              if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+                _SocialButton(
+                  google: false,
+                  onTap: () => _onConfirm(.apple),
                 ),
-              ),
-              SizedBox(height: 15),
-              Row(
-                spacing: 10,
-                children: [
-                  _SocialButton(google: true, onTap: () => _onConfirm(.google)),
-                  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
-                    _SocialButton(
-                      google: false,
-                      onTap: () => _onConfirm(.apple),
-                    ),
-                ],
-              ),
-              SizedBox(height: 15),
-              TextButton(
-                onPressed: () => Navigator.of(context).pushNamed('/sign-up'),
-                child: Text(context.uiCopy.createAccount),
-              ),
             ],
           ),
-        ),
+          SizedBox(height: 15),
+          TextButton(
+            onPressed: () => Navigator.of(context).pushNamed('/sign-up'),
+            child: Text(context.uiCopy.createAccount),
+          ),
+        ],
       ),
     );
   }
@@ -412,6 +531,14 @@ class _SocialButton extends StatelessWidget {
         onPressed: onTap,
       ),
     );
+  }
+}
+
+class _T extends SingleChildRenderObjectWidget {
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    // TODO: implement createRenderObject
+    throw UnimplementedError();
   }
 }
 
@@ -587,4 +714,78 @@ enum Alignment {
 
 extension on CommandResult<AuthUser?, FAWServiceErrorAutoLogin> {
   bool get _isLoading => isLoading || isInitial;
+}
+
+class const _Flexible({
+  required final double bottom,
+  final int flex = 2,
+  final FlexFit fit = FlexFit.loose,
+  required super.child,
+}) extends ParentDataWidget<FlexParentData> {
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is FlexParentData);
+    final parentData = renderObject.parentData! as FlexParentData;
+
+    // print([
+    //   'bottom: $bottom',
+    //   // renderObject.runtimeType,
+    //   // parentData.runtimeType,
+    //   parentData.offset.dx,
+    //   parentData.offset.dy,
+    //   parentData.previousSibling,
+    //   parentData.nextSibling,
+    // ]);
+
+    // // renderObject.layout(BoxConstraints(maxHeight: bottom));
+
+    // print([
+    //   renderObject.letType<RenderBox>()?.let(
+    //     (it) => it.hasSize ? it.size : null,
+    //   ),
+    // ]);
+
+    final signinBox = parentData.previousSibling!;
+    // signinBox.layout(BoxConstraints());
+
+    final logoBox = signinBox.parentData
+        .letType<FlexParentData>()
+        ?.previousSibling;
+
+    logoBox?.layout(BoxConstraints());
+
+    print([
+      'signinBox: $signinBox',
+      if (signinBox.hasSize) 'signinBox.size: ${signinBox.size}',
+      'logoBox: $logoBox',
+      if (logoBox?.hasSize ?? false) 'logoBox.size: ${logoBox?.size}',
+    ]);
+
+    // renderObject.layout(constraints);
+
+    var needsLayout = false;
+
+    if (parentData.flex != flex) {
+      parentData.flex = flex;
+      needsLayout = true;
+    }
+
+    if (parentData.fit != fit) {
+      parentData.fit = fit;
+      needsLayout = true;
+    }
+
+    if (needsLayout || true) {
+      renderObject.parent?.markNeedsLayout();
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Flex;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('flex', flex));
+  }
 }
