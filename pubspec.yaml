@@ -9,12 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_auth: ^6.2.0
-  firebase_core: ^4.0.0
-
   utils_well:
     git:
       url: https://github.com/WellingtonBipo/utils_well.git
+  firebase_auth: ^6.2.0
+  firebase_core: ^4.0.0
 
 dev_dependencies:
   flutter_test:

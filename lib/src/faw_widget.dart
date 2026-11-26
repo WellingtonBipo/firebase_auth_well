@@ -85,9 +85,9 @@ class FAWAppBarStyle {
 }
 
 class const FAWLogo({
-  final Widget? logotype,
-  final Widget? slogan,
-  final Widget? brandMark,
+  final Widget? Function(BuildContext context, double animation)? logotype,
+  final Widget? Function(BuildContext context, double animation)? slogan,
+  final Widget? Function(BuildContext context, double animation)? brandMark,
   final BoxConstraints? brandMarkConstraints,
 }) {}
 
@@ -141,26 +141,18 @@ extension FAWWidgetInternal on BuildContext {
   }
 
   void showFawMessage(String message, {bool error = true}) {
-    final scaffoldMsgr = ScaffoldMessenger.maybeOf(this);
-
-    scaffoldMsgr
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: error ? theme.colorScheme.error : null,
-        ),
-      );
-
-    if (scaffoldMsgr == null) {
-      showSnackBar(
-        context: this,
-        message: message,
-        backgroundColor: fawStyle.secondaryColor,
-        textStyle: TextStyle(color: textTheme.bodyMedium?.color),
-        borderRadius: fawStyle.buttonStyle?.borderRadius?.resolve(.elevated),
-      );
-    }
+    showSnackBar(
+      context: this,
+      message: message,
+      backgroundColor:
+          fawStyle.secondaryColor ??
+          theme.snackBarTheme.backgroundColor ??
+          theme.colorScheme.onError,
+      borderRadius: fawStyle.buttonStyle?.borderRadius?.resolve(.elevated),
+      textStyle: theme.textTheme.bodyMedium?.copyWith(
+        color: textTheme.bodyMedium?.color,
+      ),
+    );
   }
 
   void showFawUnknownError(FAWServiceUnknownError error, [String? message]) {

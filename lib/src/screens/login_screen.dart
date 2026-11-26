@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:firebase_auth_well/src/faw_service.dart';
 import 'package:firebase_auth_well/src/faw_widget.dart';
@@ -21,11 +22,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   //
-  late final _logoAnimation = AnimationController(
-    vsync: this,
-    duration: Duration(milliseconds: 300),
-  );
-
   late final _loginProvider = Command(FAWServiceInternal.loginProvider);
   late final _autoLogin = Command((_) => FAWServiceInternal.autoLogin());
   late final _loginEmail = Command(
@@ -55,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
-    _logoAnimation.dispose();
     _autoLogin.dispose();
     _loginEmail.dispose();
     _loginProvider.dispose();
@@ -89,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (context, _) {
         final r = _autoLogin.result;
         if (r._isLoading) return ColoredBox(color: context.backgroundColor);
-        // final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
         return IgnorePointer(
           ignoring: _loginEmail.isLoading || _loginProvider.isLoading,
           child: FAWScaffold(
@@ -101,57 +95,32 @@ class _LoginScreenState extends State<LoginScreen>
                     height: MediaQuery.paddingOf(context).top,
                   ),
                 ),
-                // Expanded(
-                //   flex: 4,
-                //   child: LayoutBuilder(
-                //     builder: (context, constraints) {
-                //       // print(constraints.maxHeight);
-                //       // return SizedBox.shrink();
-                //       // return _body(constraints.maxHeight * .33);
-                //       return Column(
-                //         children: [
-                //           ?context.fawStyle.logo?.brandMark,
-                //           ?context.fawStyle.logo?.logotype,
-                //           ?context.fawStyle.logo?.slogan,
-                //         ],
-                //       );
-                //     },
-                //   ),
-                // ),
-                // _signin(),
-                // // Spacer(),
-                // // _signup(),
-                // // Spacer(),
-                // Builder(
-                //   builder: (context) => _Flexible(
-                //     bottom: MediaQuery.viewInsetsOf(context).bottom,
-                //     child: _signup(),
-                //   ),
-                // ),
-                // builder: (context) => ConstrainedBox(
-                //   constraints: BoxConstraints(
-                //     minHeight: MediaQuery.viewInsetsOf(context).bottom,
-                //   ),
-                //   child: CustomLay,
-                //   // child: LayoutBuilder(
-                //   //   builder: (context, constraints) {
-                //   //     print(constraints.maxHeight);
-                //   //     return Align(child: _signup());
-                //   //   },
-                //   // ),
-                // ),
-                // ),
-                // Spacer(),
                 Expanded(
                   child: _CustomLayout(
-                    controller: _logoAnimation,
+                    children: [
+                      ?context.fawStyle.logo?.let(
+                        (l) {
+                          if (l.brandMark == null &&
+                              l.logotype == null &&
+                              l.slogan == null) {
+                            return null;
+                          }
+                          return LayoutId(id: 'logo', child: _Logo(l));
+                        },
+                      ),
+                      LayoutId(
+                        id: 'signin',
+                        child: _signin(),
+                      ),
+                      LayoutId(
+                        id: 'signup',
+                        child: _signup(),
+                      ),
+                    ],
                     handleChildren: (children) {
                       final logo = children['logo'];
                       final signin = children['signin']!;
                       final signup = children['signup']!;
-
-                      signin.layout();
-                      signup.layout();
 
                       final maxHeight = signin.constraints.maxHeight;
 
@@ -161,10 +130,9 @@ class _LoginScreenState extends State<LoginScreen>
                           (signup.size.height +
                               MediaQuery.viewPaddingOf(context).bottom);
 
-                      final logoPadding = maxHeight * .01;
-                      // TODO(Wellington): make dinamic
-                      final flex = logo == null ? 4 : (space > 700 ? 6 : 8);
-                      final between = space / (flex + (logo == null ? 0 : 2));
+                      final hasLogo = logo != null;
+                      final flex = hasLogo ? (space > 700 ? 6 : 8) : 3;
+                      final between = space / (flex + (hasLogo ? 2 : 0));
 
                       signup._align(
                         maxHeight -
@@ -184,33 +152,26 @@ class _LoginScreenState extends State<LoginScreen>
 
                       signin._align(signinY1);
 
-                      final logoHeight = signin.position.dy - (2 * logoPadding);
-                      logo?.layout(
-                        constraints: (c) => c.enforce(
-                          BoxConstraints(maxHeight: logoHeight),
-                        ),
-                      );
-                      logo?._align(
-                        logoPadding + logoHeight / 2 - logo.size.height / 2,
-                      );
-
-                      // print(['constraints', signin.constraints]);
+                      logo?.let((l) {
+                        final logoHeight =
+                            signin.position.dy - (2 * _logoPadding(context));
+                        l.layout(
+                          constraints: (c) => c.enforce(
+                            BoxConstraints(
+                              maxHeight: logoHeight,
+                              maxWidth: c.maxWidth - 2 * _horizontalPadding,
+                            ),
+                          ),
+                        );
+                        l._align(
+                          _logoPadding(context) +
+                              logoHeight / 2 -
+                              logo.size.height / 2,
+                        );
+                      });
 
                       return;
                     },
-                    children: [
-                      ?_logoWidget()?.let(
-                        (e) => LayoutId(id: 'logo', child: e),
-                      ),
-                      LayoutId(
-                        id: 'signin',
-                        child: _signin(),
-                      ),
-                      LayoutId(
-                        id: 'signup',
-                        child: _signup(),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -221,102 +182,9 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget? _logoWidget() {
-    final FAWLogo(:brandMark, :logotype, :slogan) =
-        context.fawStyle.logo ?? FAWLogo();
-
-    if (brandMark == null && logotype == null && slogan == null) return null;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        print('constraints: $constraints');
-        final children = [
-          ?brandMark,
-          ?logotype,
-          ?slogan,
-        ];
-        return Column(
-          mainAxisSize: .min,
-          children: children,
-        );
-      },
-    );
-  }
-
-  Size? _handleLayout(Map<Object?, SetableChild> children) {
-    final body = children.values.first;
-    var bodyHeight = body.minHeight();
-
-    final bmC = context.fawStyle.logo?.brandMarkConstraints;
-    final brandMark = children['brandMark'];
-    final logotype = children['logotype'];
-    final slogan = children['slogan'];
-
-    var brandMarkHeight = brandMark == null
-        ? 0.0
-        : (bmC?.maxHeight ?? (brandMark.size.height));
-
-    var logoHeight = 0.0;
-    if (logotype != null) logoHeight += logotype.size.height;
-    if (slogan != null) logoHeight += slogan.size.height;
-    if (brandMark != null) logoHeight += brandMarkHeight;
-
-    var freeSpace = body.constraints.maxHeight - bodyHeight;
-
-    if (logoHeight > freeSpace) {
-      // final b = logoHeight
-      if (bmC != null && logoHeight - bmC._diff <= freeSpace) {
-        brandMarkHeight -= logoHeight - freeSpace;
-        if (brandMarkHeight < bmC.minHeight) {
-          logoHeight -= bmC.minHeight - brandMarkHeight;
-          brandMarkHeight = bmC.minHeight;
-        }
-      } else {}
-    }
-
-    // if (brandMark != null && logoHeight > freeSpace) {}
-
-    freeSpace -= logoHeight;
-    var startPoint = 0.0;
-
-    if (freeSpace < 0) {
-      bodyHeight += freeSpace;
-      freeSpace = 0;
-      if (bodyHeight < 50) {
-        bodyHeight = 50;
-        startPoint = -50;
-      }
-    }
-
-    final hasLogo = logoHeight > 0;
-    final space = freeSpace / (hasLogo ? 3 : 2);
-
-    body.layout(
-      constraints: (c) =>
-          BoxConstraints(maxHeight: bodyHeight, maxWidth: c.maxWidth),
-    );
-    brandMark?.layout(
-      constraints: (c) => BoxConstraints(maxHeight: brandMarkHeight),
-    );
-
-    var lastBottom = 0.0;
-    double getBottom([SetableChild? child, double v = 0]) {
-      lastBottom += v;
-      child?.rect.height.let((b) => lastBottom += b);
-      return lastBottom;
-    }
-
-    brandMark?._align(getBottom(null, space + startPoint));
-    logotype?._align(getBottom(brandMark));
-    slogan?._align(getBottom(logotype ?? brandMark));
-    body._align(getBottom(logotype ?? brandMark ?? slogan, space));
-
-    return null;
-  }
-
   Widget _signin() {
     return Container(
-      padding: .symmetric(horizontal: 30),
+      padding: .symmetric(horizontal: _horizontalPadding),
       constraints: BoxConstraints(maxWidth: 450),
       child: Column(
         crossAxisAlignment: .stretch,
@@ -396,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _signup() {
     return Container(
-      padding: .symmetric(horizontal: 30),
+      padding: .symmetric(horizontal: _horizontalPadding),
       constraints: BoxConstraints(maxWidth: 450),
       child: Column(
         crossAxisAlignment: .stretch,
@@ -494,14 +362,6 @@ class _LoginScreenState extends State<LoginScreen>
   }
 }
 
-extension on BoxConstraints {
-  double get _diff => maxHeight - minHeight;
-}
-
-extension on SetableChild {
-  void _align(double v) => align(.topCenter, top: v);
-}
-
 class _SocialButton extends StatelessWidget {
   const _SocialButton({required this.google, required this.onTap});
 
@@ -534,28 +394,187 @@ class _SocialButton extends StatelessWidget {
   }
 }
 
-class _T extends SingleChildRenderObjectWidget {
+class const _Logo(final FAWLogo logo) extends StatefulWidget {
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    // TODO: implement createRenderObject
-    throw UnimplementedError();
+  State<_Logo> createState() => _LogoState();
+}
+
+class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
+  late final _animationController = AnimationController(
+    vsync: this,
+    duration: Duration(milliseconds: 240),
+  );
+
+  late final _animation = CurvedAnimation(
+    parent: _animationController,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  double? __value;
+  double get _value => __value ?? _animation.value;
+
+  var _padding = 0.0;
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _animation.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController.addListener(() => setState(() {}));
+  }
+
+  Widget? _makeChild(
+    Widget? Function(BuildContext, double)? w,
+    String name,
+  ) => w?.call(context, _value)?.let((e) => LayoutId(id: name, child: e));
+
+  @override
+  Widget build(BuildContext context) {
+    return _CustomLayout(
+      children: [
+        ?_makeChild(widget.logo.brandMark, 'brandMark'),
+        ?_makeChild(widget.logo.logotype, 'logotype'),
+        ?_makeChild(widget.logo.slogan, 'slogan'),
+      ],
+      handleChildren: (children) {
+        final brandMark = children['brandMark'];
+        final logotype = children['logotype'];
+        final slogan = children['slogan'];
+
+        final BoxConstraints(:maxHeight, :maxWidth) =
+            (brandMark ?? logotype ?? slogan)!.constraints;
+
+        final logoTypeSloganHeight =
+            (logotype?.size.height ?? 0) + (slogan?.size.height ?? 0);
+
+        final brandConstr = brandMark?.let(
+          (_) => widget.logo.brandMarkConstraints,
+        );
+        final minBrandHeight = brandConstr?.minHeight ?? 0;
+        final maxBrandHeight = brandConstr?.maxHeight ?? double.infinity;
+
+        final minVertHeight = logoTypeSloganHeight + minBrandHeight;
+
+        final shouldBeHorizontal = minVertHeight > maxHeight;
+
+        _maybeAnimate(context, shouldBeHorizontal);
+
+        final brandHeight = math.min(
+          maxBrandHeight,
+          maxHeight - logoTypeSloganHeight,
+        );
+
+        brandMark?.layout(
+          constraints: (c) => c.enforce(
+            BoxConstraints(
+              maxHeight: shouldBeHorizontal.not
+                  ? brandHeight
+                  : math.min(
+                      maxHeight,
+                      lerpDouble(brandHeight, maxHeight, _value)!,
+                    ),
+            ),
+          ),
+        );
+
+        var emptySpaceVert =
+            (maxHeight - logoTypeSloganHeight - (brandMark?.size.height ?? 0));
+        emptySpaceVert = emptySpaceVert.clamp(0, .infinity);
+
+        if (shouldBeHorizontal.not) {
+          brandMark?._align(emptySpaceVert / 2);
+          logotype?._align(
+            brandMark?.rect.bottom ?? (emptySpaceVert / 2),
+          );
+          slogan?._align(
+            (logotype ?? brandMark)?.rect.bottom ?? (emptySpaceVert / 2),
+          );
+          return;
+        }
+
+        final emptySpaceHor =
+            maxWidth -
+            (brandMark?.rect.width ?? 0) -
+            math.max(logotype?.size.width ?? 0, slogan?.size.width ?? 0);
+
+        final brandY = (emptySpaceVert / 2) + (brandMark?.size._centerX ?? 0);
+
+        final centerVertX = maxWidth / 2;
+
+        brandMark?.setPosition(
+          centerY: lerpDouble(brandY, maxHeight / 2, _value),
+          centerX: lerpDouble(
+            centerVertX,
+            (emptySpaceHor / 2) + brandMark.size._centerX,
+            _value,
+          ),
+        );
+
+        final centerHorLogoTypeSloganX = lerpDouble(
+          centerVertX,
+          (maxWidth - (emptySpaceHor / 2)) -
+              ((logotype ?? slogan)?.rect.width ?? 0) / 2,
+          _value,
+        )!;
+
+        final logotypeY = lerpDouble(
+          brandY + ((brandMark?.size.width ?? 0) / 2),
+          (maxHeight - logoTypeSloganHeight) / 2,
+          _value,
+        )!;
+
+        logotype?.setPosition(
+          y: logotypeY,
+          centerX: centerHorLogoTypeSloganX,
+        );
+
+        slogan?.setPosition(
+          y: logotypeY + (logotype?.size.height ?? 0),
+          centerX: centerHorLogoTypeSloganX,
+        );
+
+        return;
+      },
+    );
+  }
+
+  void _maybeAnimate(BuildContext context, bool shouldBeHorizontal) {
+    final currentPadding = MediaQuery.viewInsetsOf(context).bottom;
+    if (currentPadding == 0 && shouldBeHorizontal) {
+      __value = 1;
+      addPostFrameCallback(
+        () => _animation.value == 1 ? null : _animationController.value = 1,
+      );
+      return;
+    }
+    __value == null;
+    if (currentPadding != _padding) {
+      shouldBeHorizontal && currentPadding > _padding
+          ? _animationController.forward()
+          : _animationController.reverse();
+      _padding = currentPadding;
+    }
   }
 }
 
 class const _CustomLayout({
   required super.children,
   required super.handleChildren,
-  required final AnimationController controller,
 }) extends CustomLayout {
   @override
   RenderCustomLayout createRenderObject(BuildContext context) {
-    return _RenderCustomLayout(handleChildren, controller);
+    return _RenderCustomLayout(handleChildren);
   }
 }
 
 class _RenderCustomLayout(
   super.handleChildren,
-  final AnimationController controller,
 ) extends RenderCustomLayout {}
 
 class const CustomLayout({
@@ -641,7 +660,7 @@ class SetableChild {
   Object? get id => _childParentData.id;
 
   Size get size {
-    if (!_isLaidOut) layout();
+    if (!_isLaidOut || !_box.hasSize) layout();
     return _box.size;
   }
 
@@ -669,7 +688,15 @@ class SetableChild {
 
   double minWidth() => _box.getMinIntrinsicWidth(constraints.maxHeight);
 
-  void setPosition({double? x, double? y}) => position = Offset(x ?? 0, y ?? 0);
+  void setPosition({
+    double? x,
+    double? y,
+    double? centerX,
+    double? centerY,
+  }) => position = Offset(
+    centerX?.let((v) => v - size.width / 2) ?? x ?? 0,
+    centerY?.let((v) => v - size.height / 2) ?? y ?? 0,
+  );
 
   void align(
     Alignment alignment, {
@@ -712,80 +739,19 @@ enum Alignment {
   bottomRight,
 }
 
-extension on CommandResult<AuthUser?, FAWServiceErrorAutoLogin> {
-  bool get _isLoading => isLoading || isInitial;
+final _horizontalPadding = 30.0;
+
+double _logoPadding(BuildContext context) =>
+    MediaQuery.sizeOf(context).longestSide * .02;
+
+extension on Size {
+  double get _centerX => center(.zero).dx;
 }
 
-class const _Flexible({
-  required final double bottom,
-  final int flex = 2,
-  final FlexFit fit = FlexFit.loose,
-  required super.child,
-}) extends ParentDataWidget<FlexParentData> {
-  @override
-  void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is FlexParentData);
-    final parentData = renderObject.parentData! as FlexParentData;
+extension on SetableChild {
+  void _align(double v) => align(.topCenter, top: v);
+}
 
-    // print([
-    //   'bottom: $bottom',
-    //   // renderObject.runtimeType,
-    //   // parentData.runtimeType,
-    //   parentData.offset.dx,
-    //   parentData.offset.dy,
-    //   parentData.previousSibling,
-    //   parentData.nextSibling,
-    // ]);
-
-    // // renderObject.layout(BoxConstraints(maxHeight: bottom));
-
-    // print([
-    //   renderObject.letType<RenderBox>()?.let(
-    //     (it) => it.hasSize ? it.size : null,
-    //   ),
-    // ]);
-
-    final signinBox = parentData.previousSibling!;
-    // signinBox.layout(BoxConstraints());
-
-    final logoBox = signinBox.parentData
-        .letType<FlexParentData>()
-        ?.previousSibling;
-
-    logoBox?.layout(BoxConstraints());
-
-    print([
-      'signinBox: $signinBox',
-      if (signinBox.hasSize) 'signinBox.size: ${signinBox.size}',
-      'logoBox: $logoBox',
-      if (logoBox?.hasSize ?? false) 'logoBox.size: ${logoBox?.size}',
-    ]);
-
-    // renderObject.layout(constraints);
-
-    var needsLayout = false;
-
-    if (parentData.flex != flex) {
-      parentData.flex = flex;
-      needsLayout = true;
-    }
-
-    if (parentData.fit != fit) {
-      parentData.fit = fit;
-      needsLayout = true;
-    }
-
-    if (needsLayout || true) {
-      renderObject.parent?.markNeedsLayout();
-    }
-  }
-
-  @override
-  Type get debugTypicalAncestorWidgetClass => Flex;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IntProperty('flex', flex));
-  }
+extension on CommandResult<AuthUser?, FAWServiceErrorAutoLogin> {
+  bool get _isLoading => isLoading || isInitial;
 }

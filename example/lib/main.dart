@@ -13,11 +13,8 @@ import 'package:flutter/material.dart';
 void main() async {
   DevicePreview.enable(padding: const EdgeInsets.all(16));
   DevicePreview.controller.applyPreset(DevicePresets.iPhoneSe3);
-  // DevicePreview.controller.applyPreset(DevicePresets.iPhone17);
-  // DevicePreview.controller.applyPreset(DevicePresets.iPad10);
   DevicePreview.controller.update(
     (d) => d.copyWith(
-      keyboardInset: 0,
       platformBrightness: PlatformDispatcher.instance.platformBrightness,
     ),
   );
@@ -26,46 +23,50 @@ void main() async {
   runApp(const ExampleApp());
 }
 
-FAWWidgetStyle customStyle(BuildContext context) => FAWWidgetStyle(
-  primaryColor: Colors.red,
-  logo: FAWLogo(
-    slogan: Container(
-      color: Colors.blue,
-      padding: const EdgeInsets.all(8.0),
-      child: const Text('slogan'),
-    ),
-    logotype: const Text('logotype'),
-    // brandMarkConstraints: const BoxConstraints(minHeight: 50, maxHeight: 100),
-    brandMark: Container(
-      color: Colors.red,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // print(['brandMark: Container', constraints]);
-          return Icon(
+FAWWidgetStyle customStyle(BuildContext context) {
+  final theme = Theme.of(context);
+  final isLight = theme.brightness == .light;
+  return FAWWidgetStyle(
+    logo: FAWLogo(
+      slogan: (_, animation) => Container(
+        height: lerpDouble(25, 0, animation),
+        padding: .only(top: lerpDouble(5, 0, animation)!),
+        child: const Text('slogan'),
+      ),
+      logotype: (_, animation) => Container(
+        padding: .only(right: 40 * animation, bottom: 5),
+        child: const Text('logotype'),
+      ),
+      brandMarkConstraints: const BoxConstraints(
+        minHeight: 120,
+        maxHeight: 170,
+      ),
+      brandMark: (_, animation) => LayoutBuilder(
+        builder: (context, constraints) => Container(
+          padding: .only(right: 10 * animation),
+          child: Icon(
             Icons.ac_unit,
-            size: clampDouble(constraints.maxHeight, 50, 150),
-          );
-        },
+            size: constraints.maxHeight.clamp(80, 200),
+          ),
+        ),
       ),
     ),
-  ),
-  buttonStyle: FAWButtonStyle(
-    borderRadius: .all(BorderRadius.circular(8)),
-    padding: ButtonProperties({
-      for (var type in ButtonType.values.toList()..remove(ButtonType.input))
-        type: EdgeInsets.symmetric(vertical: 20),
-    }),
-    backgroundColor: ButtonProperties({.elevated: Colors.red}),
-    foregroundColor: ButtonProperties({
-      .elevated: Colors.white,
-      .outlined: Colors.white,
-      .text: Colors.red,
-    }),
-    textStyle: ButtonProperties({
-      .text: const TextStyle(fontSize: 16, color: Colors.amber),
-    }),
-    shapeBorder: ButtonProperties({
-      .input: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    }),
-  ),
-);
+    primaryColor: Colors.yellow,
+    buttonStyle: FAWButtonStyle(
+      borderRadius: .all(BorderRadius.circular(8)),
+      padding: ButtonProperties({
+        for (var type in ButtonType.values.toList()..remove(ButtonType.input))
+          type: EdgeInsets.symmetric(vertical: 20),
+      }),
+      foregroundColor: ButtonProperties({
+        if (!isLight) .outlined: Colors.white,
+      }),
+      textStyle: ButtonProperties({
+        .text: const TextStyle(fontSize: 17, color: Colors.red),
+      }),
+      shapeBorder: ButtonProperties({
+        .input: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      }),
+    ),
+  );
+}

@@ -235,13 +235,30 @@ class _FlowWithBackButton extends StatelessWidget {
             alignment: Alignment.topRight,
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: FloatingActionButton.small(
-                heroTag: null,
+              child: IconButton(
                 tooltip: 'Back to start',
+                onLongPress: () {
+                  final currentDevice =
+                      DevicePreview.controller.simulation!.presetId;
+                  final devices = [
+                    DevicePresets.iPhoneSe3,
+                    DevicePresets.iPhone17,
+                    DevicePresets.iPadAir13M2,
+                  ];
+                  var nextDevice = devices.first;
+                  for (var i = 0; i < devices.length; i++) {
+                    if (devices[i].id == currentDevice &&
+                        i < devices.length - 1) {
+                      nextDevice = devices[i + 1];
+                      break;
+                    }
+                  }
+                  DevicePreview.controller.applyPreset(nextDevice);
+                },
                 onPressed: () => Navigator.of(
                   context,
                 ).pushNamedAndRemoveUntil('/', (_) => false),
-                child: const Icon(Icons.close),
+                icon: const Icon(Icons.close),
               ),
             ),
           ),
