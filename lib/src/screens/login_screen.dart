@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen>
                     hintText: context.uiCopy.emailHint,
                     suffixIcon: TextFieldSuffix(),
                   ),
-                  autofillHints: [AutofillHints.username],
+                  autofillHints: [AutofillHints.username, AutofillHints.email],
                   onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                 ),
                 SizedBox(height: 15),
