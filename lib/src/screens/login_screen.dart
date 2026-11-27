@@ -402,7 +402,7 @@ class const _Logo(final FAWLogo logo) extends StatefulWidget {
 class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
   late final _animationController = AnimationController(
     vsync: this,
-    duration: Duration(milliseconds: 240),
+    duration: Duration(milliseconds: 300),
   );
 
   late final _animation = CurvedAnimation(
@@ -411,10 +411,10 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
     reverseCurve: Curves.easeInCubic,
   );
 
+  bool? _verifyStartHorizontal;
+
   double? __value;
   double get _value => __value ?? _animation.value;
-
-  var _padding = 0.0;
 
   @override
   void dispose() {
@@ -487,7 +487,7 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
             (maxHeight - logoTypeSloganHeight - (brandMark?.size.height ?? 0));
         emptySpaceVert = emptySpaceVert.clamp(0, .infinity);
 
-        if (shouldBeHorizontal.not) {
+        if (shouldBeHorizontal.not && _animationController.isAnimating.not) {
           brandMark?._align(emptySpaceVert / 2);
           logotype?._align(
             brandMark?.rect.bottom ?? (emptySpaceVert / 2),
@@ -503,12 +503,13 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
             (brandMark?.rect.width ?? 0) -
             math.max(logotype?.size.width ?? 0, slogan?.size.width ?? 0);
 
-        final brandY = (emptySpaceVert / 2) + (brandMark?.size._centerX ?? 0);
+        final brandYCenter =
+            (emptySpaceVert / 2) + (brandMark?.size._centerY ?? 0);
 
         final centerVertX = maxWidth / 2;
 
         brandMark?.setPosition(
-          centerY: lerpDouble(brandY, maxHeight / 2, _value),
+          centerY: lerpDouble(brandYCenter, maxHeight / 2, _value),
           centerX: lerpDouble(
             centerVertX,
             (emptySpaceHor / 2) + brandMark.size._centerX,
@@ -524,7 +525,7 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
         )!;
 
         final logotypeY = lerpDouble(
-          brandY + ((brandMark?.size.width ?? 0) / 2),
+          brandYCenter + ((brandMark?.size.height ?? 0) / 2),
           (maxHeight - logoTypeSloganHeight) / 2,
           _value,
         )!;
@@ -545,21 +546,22 @@ class _LogoState extends State<_Logo> with SingleTickerProviderStateMixin {
   }
 
   void _maybeAnimate(BuildContext context, bool shouldBeHorizontal) {
-    final currentPadding = MediaQuery.viewInsetsOf(context).bottom;
-    if (currentPadding == 0 && shouldBeHorizontal) {
+    if (_verifyStartHorizontal == true &&
+        _animation.value == 0 &&
+        shouldBeHorizontal) {
       __value = 1;
+      _verifyStartHorizontal = false;
       addPostFrameCallback(
         () => _animation.value == 1 ? null : _animationController.value = 1,
       );
       return;
     }
+
     __value == null;
-    if (currentPadding != _padding) {
-      shouldBeHorizontal && currentPadding > _padding
-          ? _animationController.forward()
-          : _animationController.reverse();
-      _padding = currentPadding;
-    }
+    _verifyStartHorizontal = _verifyStartHorizontal == null ? true : false;
+    shouldBeHorizontal
+        ? _animationController.forward()
+        : _animationController.reverse();
   }
 }
 
@@ -746,6 +748,7 @@ double _logoPadding(BuildContext context) =>
 
 extension on Size {
   double get _centerX => center(.zero).dx;
+  double get _centerY => center(.zero).dy;
 }
 
 extension on SetableChild {

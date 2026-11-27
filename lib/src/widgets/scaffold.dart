@@ -18,7 +18,11 @@ class const FAWScaffold({
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        body: body,
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: body,
+        ),
         appBar: title == null && Navigator.canPop(context).not
             ? null
             : AppBar(
@@ -33,6 +37,7 @@ class const FAWScaffold({
     return Theme.of(context).copyWith(
       brightness: context.fawStyle.brightness,
       textTheme: context.textTheme,
+      visualDensity: .compact,
       colorScheme: ColorScheme.fromSeed(
         brightness: context.fawStyle.brightness!,
         seedColor: context.fawStyle.primaryColor!,
@@ -41,6 +46,7 @@ class const FAWScaffold({
       elevatedButtonTheme: _elevatedButtonTheme(context),
       textButtonTheme: _textButtonTheme(context),
       inputDecorationTheme: InputDecorationTheme(
+        visualDensity: VisualDensity(horizontal: -4, vertical: -4),
         contentPadding: context._padding(.input)?.min(left: 12, right: 12),
         border:
             context.fawStyle.buttonStyle?.shapeBorder?[.input] as InputBorder?,
